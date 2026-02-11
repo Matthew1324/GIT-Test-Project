@@ -20,7 +20,7 @@ def blobFile(f):
     print(finalData)
     finalHash = hashlib.sha1(finalData).hexdigest()
     print(finalHash)
-    os.makedirs(f"{os.curdir}/.xgit/{finalHash[:2]}")
+    os.makedirs(f"{os.curdir}/.xgit/{finalHash[:2]}", exist_ok=True)
     with open(f"{os.curdir}/.xgit/{finalHash[:2]}/{finalHash}", 'wb') as blob: blob.write(finalData)
     return
 
@@ -31,3 +31,5 @@ with os.scandir(os.curdir) as files:
         if file.is_file():
             with open(file, 'rb') as fileObj:
                 blobFile(fileObj)
+        elif file.is_dir():
+            print(f"folder {file.name}")
