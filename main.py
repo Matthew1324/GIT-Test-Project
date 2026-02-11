@@ -19,12 +19,26 @@ def blobFile(f):
     finalHash = hashlib.sha1(finalData).hexdigest()
     os.makedirs(f"{os.curdir}/.xgit/{finalHash[:2]}", exist_ok=True)
     with open(f"{os.curdir}/.xgit/{finalHash[:2]}/{finalHash}", 'wb') as blob: blob.write(finalData)
-    return
+    return finalHash
 
 def createIgnoreFile():
     ignoreList = [".xgit", ".git"] #Default ignored files
     with open(f"{os.curdir}/.xgit/ignore.dat", 'w') as f: f.write('\n'.join(ignoreList))
     return ignoreList
+
+def makeTrees(directory):
+    blobs = list()
+    with os.scandir(directory) as files:
+        for file in files:
+            if file.is_file() and not file.name in ignoreList:
+                print(f"file {file.name}")
+                with open(file, 'rb') as fileObj:
+                    blobs.append(blobFile(fileObj))
+            elif file.is_dir() and not file.name in ignoreList:
+                print(f"folder {file.name}")
+                makeTrees(file.path)
+    print(blobs)
+    return
 
 
 
@@ -37,12 +51,4 @@ except OSError:
     print(" - Regenerating ignore.dat")
     ignoreList = createIgnoreFile()
 
-
-with os.scandir(os.curdir) as files:
-    for file in files:
-        if file.is_file() and not file.name in ignoreList:
-            print(f"file {file.name}")
-            with open(file, 'rb') as fileObj:
-                blobFile(fileObj)
-        elif file.is_dir() and not file.name in ignoreList:
-            print(f"folder {file.name}")
+makeTrees(os.curdir)
